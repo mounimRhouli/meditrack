@@ -1,16 +1,12 @@
 abstract class Failure {
   final String message;
-  Failure(this.message);
-}
-
-class DatabaseFailure extends Failure {
-  DatabaseFailure(super.message);
-}
-
-class LocalStorageFailure extends Failure {
-  LocalStorageFailure(super.message);
+  const Failure(this.message);
 }
 
 class ServerFailure extends Failure {
-  ServerFailure(super.message);
+  const ServerFailure(String message) : super(message);
+}
+
+class CacheFailure extends Failure {
+  const CacheFailure(String message) : super(message);
 }
