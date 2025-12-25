@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-// Imports based on your corrected structure
 import '../models/auth_state.dart';
 import '../viewmodels/auth_viewmodel.dart';
-import 'widgets/auth_form.dart'; // Corrected path
-import '../../../../routes/route_names.dart'; // Assuming you have this defined
+import 'widgets/auth_form.dart';
+import 'widgets/social_login_buttons.dart'; // <--- 1. Import the new widget
+import '../../../../routes/route_names.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Architect's Note: We use Consumer to listen to state changes efficiently.
     return Consumer<AuthViewModel>(
       builder: (context, viewModel, child) {
-        // Listener for Side Effects (Navigation/Snackbars)
-        // Note: In a real app, you might use a dedicated package or mixin
-        // to handle one-time events to avoid showing the snackbar multiple times during rebuilds.
+        // ... (Error and Success handling remains the same) ...
         if (viewModel.status.isError && viewModel.errorMessage != null) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -31,7 +28,6 @@ class LoginScreen extends StatelessWidget {
 
         if (viewModel.status.isAuthenticated) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            // Navigate to Home and remove back stack so user can't swipe back to login
             Navigator.pushReplacementNamed(context, AppRouteNames.home);
           });
         }
@@ -45,11 +41,11 @@ class LoginScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // 1. Logo & Header
+                    // Header Section
                     const Icon(
                       Icons.health_and_safety,
                       size: 80,
-                      color: Colors.blue, // Use AppColors.primary later
+                      color: Colors.blue,
                     ),
                     const SizedBox(height: 16),
                     Text(
@@ -57,17 +53,9 @@ class LoginScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineMedium,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Sign in to manage your health',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(
-                        context,
-                      ).textTheme.bodyLarge?.copyWith(color: Colors.grey),
-                    ),
                     const SizedBox(height: 48),
 
-                    // 2. The Reusable Auth Form
+                    // Main Form
                     AuthForm(
                       buttonText: 'Sign In',
                       isLoading: viewModel.status.isLoading,
@@ -78,7 +66,25 @@ class LoginScreen extends StatelessWidget {
 
                     const SizedBox(height: 24),
 
-                    // 3. Register Link
+                    // <--- 2. INTEGRATION POINT: Social Buttons
+                    SocialLoginButtons(
+                      isLoading: viewModel.status.isLoading,
+                      onGooglePressed: () {
+                        // Future Todo: viewModel.loginWithGoogle();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("Google Login coming soon!"),
+                          ),
+                        );
+                      },
+                      onApplePressed: () {
+                        // Future Todo: viewModel.loginWithApple();
+                      },
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Footer Link
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
