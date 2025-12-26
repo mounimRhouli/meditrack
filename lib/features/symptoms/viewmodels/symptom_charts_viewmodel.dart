@@ -24,6 +24,12 @@ class SymptomChartsViewModel extends ChangeNotifier {
   int get avgSystolic => _avgSystolic;
   int get avgDiastolic => _avgDiastolic;
   int get totalReadings => _totalReadings;
+  String? get errorMessage => _errorMessage;
+  set errorMessage(String? value) {
+    if (_errorMessage == value) return;
+    _errorMessage = value;
+    notifyListeners();
+  }
 
   bool get isLoading => _status == ChartStatus.loading;
 

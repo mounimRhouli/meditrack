@@ -1,50 +1,53 @@
 class AppStrings {
-  // Prevent instantiation
   AppStrings._();
 
   // -- General --
   static const String appName = 'MediTrack';
-  static const String welcomeMessage = 'Bonjour';
+  static const String welcomeMessage =
+      'Bienvenue'; // Changed to French to match your other strings
+  static const String welcomeBack = 'De retour ?';
   static const String dashboardTitle = 'Tableau de bord';
 
-  // -- Pillar 1: Profile & Treatments [cite: 138] --
-  static const String profileTitle = 'Profil';
-  static const String basicInfo = 'Informations de base';
+  // -- Auth --
+  static const String signIn = 'Se connecter';
+  static const String register = "S'inscrire";
+  static const String email = 'Email';
+  static const String password = 'Mot de passe';
+  static const String dontHaveAccount = "Pas encore de compte ?";
+  static const String alreadyHaveAccount = "Déjà un compte ?";
+  static const String joinMessage = "Rejoignez MediTrack";
+  static const String joinSubtitle = "Votre santé, votre priorité.";
+  static const String googleLogin = "Continuer avec Google";
+  static const String appleLogin = "Continuer avec Apple";
+
+  // -- Pillar 1: Profile & Treatments --
+  static const String profileTitle = 'Profil Médical';
+  static const String basicInfo = 'Infos de base';
   static const String age = 'Âge';
-  static const String height = 'Taille (cm)';
-  static const String weight = 'Poids (kg)';
+  static const String height = 'Taille';
+  static const String weight = 'Poids';
   static const String allergies = 'Allergies';
   static const String chronicDiseases = 'Maladies Chroniques';
+  static const String editProfile = 'Modifier le profil';
 
-  static const String treatmentsTitle = 'Traitements';
-  static const String addMedicine = 'Ajouter un Médicament';
-  static const String medicineName = 'Nom du médicament';
-  static const String medicineDosage = 'Dosage (ex: 500 mg)';
-  static const String medicineForm = 'Forme (ex: Comprimé)';
-  static const String medicineFrequency = 'Fréquence';
-
-  // -- Pillar 2: Reminders & History [cite: 145] --
-  static const String remindersTitle = 'Rappels';
-  static const String nextDose = 'Prochain médicament à prendre';
-  static const String reminderActionTaken = 'Pris';
-  static const String reminderActionIgnore = 'Ignorer';
-
-  static const String historyTitle = 'Historique';
-  static const String complianceStats = 'Observance ce mois-ci';
-
-  // -- Pillar 3: Symptoms [cite: 148] --
-  static const String symptomsTitle = 'Suivi des Symptômes';
-  static const String temp = 'Température';
-  static const String pain = 'Douleur (1-10)';
-  static const String bloodPressure = 'Tension';
-  static const String glucose = 'Glycémie';
+  // -- Pillar 3: Symptoms --
+  static const String symptomsTitle = 'Suivi Santé';
+  static const String addSymptom = 'Nouveau relevé';
+  static const String saveEntry = 'Enregistrer';
+  static const String bloodPressure = 'Tension Artérielle';
+  static const String painLevel = 'Douleur';
   static const String mood = 'Humeur';
+  static const String notes = 'Notes / Remarques';
+  static const String sys = 'SYS';
+  static const String dia = 'DIA';
 
-  // -- Pillar 4: Documents [cite: 140] --
-  static const String documentsTitle = 'Mes Documents';
-  static const String docTypePrescription = 'Ordonnance';
-  static const String docTypeAnalysis = 'Analyse';
-  static const String docTypeRadio = 'Imagerie / Radio';
+  // -- Emergency --
+  static const String emergencyTitle = 'MODE URGENCE';
+  static const String callAmbulance =
+      'APPELER SECOURS (15)'; // 15 is standard in Morocco/France, or 112
+  static const String medicalId = 'Identité Médicale';
+  static const String emergencyContacts = 'Contacts d\'urgence';
+  static const String noContacts = 'Aucun contact défini';
 
   // -- Common Actions --
   static const String save = 'Enregistrer';
@@ -52,4 +55,6 @@ class AppStrings {
   static const String delete = 'Supprimer';
   static const String edit = 'Modifier';
   static const String searchPlaceholder = 'Rechercher';
+  static const String retry = 'Réessayer';
+  static const String loading = 'Chargement...';
 }

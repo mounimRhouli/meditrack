@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_strings.dart';
+import '../../../../core/constants/app_colors.dart';
 
 class ProfileInfoCard extends StatelessWidget {
   final String? bloodType;
@@ -10,28 +12,27 @@ class ProfileInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Rely on AppTheme's CardTheme
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildStatItem(context, Icons.bloodtype, 'Blood', bloodType ?? '-'),
-            _buildDivider(),
-            _buildStatItem(
+            _buildStat(context, Icons.bloodtype, "Sang", bloodType ?? "-"),
+            Container(height: 30, width: 1, color: AppColors.border),
+            _buildStat(
               context,
               Icons.height,
-              'Height',
-              height != null ? '${height}cm' : '-',
+              AppStrings.height,
+              "${height?.toInt() ?? '-'}",
             ),
-            _buildDivider(),
-            _buildStatItem(
+            Container(height: 30, width: 1, color: AppColors.border),
+            _buildStat(
               context,
               Icons.monitor_weight,
-              'Weight',
-              weight != null ? '${weight}kg' : '-',
+              AppStrings.weight,
+              "${weight?.toInt() ?? '-'}",
             ),
           ],
         ),
@@ -39,29 +40,25 @@ class ProfileInfoCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatItem(
+  Widget _buildStat(
     BuildContext context,
     IconData icon,
     String label,
     String value,
   ) {
+    final theme = Theme.of(context);
     return Column(
       children: [
-        Icon(icon, color: Theme.of(context).primaryColor, size: 28),
-        const SizedBox(height: 8),
+        Icon(icon, color: theme.colorScheme.primary, size: 28),
+        const SizedBox(height: 4),
+        Text(label, style: theme.textTheme.bodySmall),
         Text(
           value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        Text(
-          label,
-          style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );
-  }
-
-  Widget _buildDivider() {
-    return Container(height: 40, width: 1, color: Colors.grey.shade300);
   }
 }

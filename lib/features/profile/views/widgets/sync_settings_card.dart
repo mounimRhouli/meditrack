@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 
 class SyncSettingsCard extends StatelessWidget {
   final bool isSynced;
@@ -13,22 +14,27 @@ class SyncSettingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: isSynced ? Colors.green.shade50 : Colors.orange.shade50,
+      // Using opacity for a subtle tint based on your palette
+      color: isSynced
+          ? AppColors.success.withOpacity(0.1)
+          : AppColors.warning.withOpacity(0.1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isSynced ? Colors.green.shade200 : Colors.orange.shade200,
+          color: isSynced
+              ? AppColors.success.withOpacity(0.3)
+              : AppColors.warning.withOpacity(0.3),
         ),
       ),
       child: ListTile(
         leading: Icon(
           isSynced ? Icons.cloud_done : Icons.cloud_off,
-          color: isSynced ? Colors.green : Colors.orange,
+          color: isSynced ? AppColors.success : AppColors.warning,
         ),
         title: Text(
           isSynced ? "Profile Synced" : "Unsynced Changes",
           style: TextStyle(
-            color: isSynced ? Colors.green.shade800 : Colors.orange.shade900,
+            color: isSynced ? AppColors.success : AppColors.warning,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -38,11 +44,11 @@ class SyncSettingsCard extends StatelessWidget {
               : "Tap to force sync with cloud.",
           style: TextStyle(
             fontSize: 12,
-            color: isSynced ? Colors.green.shade700 : Colors.orange.shade800,
+            color: isSynced ? AppColors.success : AppColors.warning,
           ),
         ),
         trailing: IconButton(
-          icon: const Icon(Icons.refresh),
+          icon: Icon(Icons.refresh, color: AppColors.textPrimary),
           onPressed: onSyncPressed,
         ),
       ),
