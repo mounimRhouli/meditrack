@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_dimensions.dart';
+import '../../../../core/theme/text_styles.dart';
 
 class SyncSettingsCard extends StatelessWidget {
   final bool isSynced;
@@ -14,41 +16,35 @@ class SyncSettingsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      // Using opacity for a subtle tint based on your palette
       color: isSynced
           ? AppColors.success.withOpacity(0.1)
           : AppColors.warning.withOpacity(0.1),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: isSynced
-              ? AppColors.success.withOpacity(0.3)
-              : AppColors.warning.withOpacity(0.3),
-        ),
-      ),
       child: ListTile(
+        contentPadding: const EdgeInsets.all(AppDimensions.paddingMedium),
         leading: Icon(
           isSynced ? Icons.cloud_done : Icons.cloud_off,
           color: isSynced ? AppColors.success : AppColors.warning,
+          size: AppDimensions.iconLarge,
         ),
         title: Text(
-          isSynced ? "Profile Synced" : "Unsynced Changes",
-          style: TextStyle(
+          isSynced ? "Profil Synchronisé" : "Modifications non synchronisées",
+          style: AppTextStyles.h3.copyWith(
             color: isSynced ? AppColors.success : AppColors.warning,
-            fontWeight: FontWeight.bold,
+            fontSize: 16,
           ),
         ),
-        subtitle: Text(
-          isSynced
-              ? "Your medical data is backed up."
-              : "Tap to force sync with cloud.",
-          style: TextStyle(
-            fontSize: 12,
-            color: isSynced ? AppColors.success : AppColors.warning,
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: Text(
+            isSynced
+                ? "Vos données médicales sont sauvegardées."
+                : "Appuyez pour synchroniser avec le cloud.",
+            style: AppTextStyles.bodySm,
           ),
         ),
         trailing: IconButton(
-          icon: Icon(Icons.refresh, color: AppColors.textPrimary),
+          icon: const Icon(Icons.refresh),
+          color: AppColors.textPrimary,
           onPressed: onSyncPressed,
         ),
       ),

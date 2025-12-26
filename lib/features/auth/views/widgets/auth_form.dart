@@ -23,19 +23,6 @@ class _AuthFormState extends State<AuthForm> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) return 'Veuillez entrer un email';
-    if (!value.contains('@')) return 'Email invalide';
-    return null;
-  }
-
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty)
-      return 'Veuillez entrer un mot de passe';
-    if (value.length < 6) return 'Minimum 6 caractères';
-    return null;
-  }
-
   void _submit() {
     if (_formKey.currentState!.validate()) {
       widget.onSubmitted(
@@ -43,13 +30,6 @@ class _AuthFormState extends State<AuthForm> {
         _passwordController.text.trim(),
       );
     }
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
   }
 
   @override
@@ -61,33 +41,31 @@ class _AuthFormState extends State<AuthForm> {
         children: [
           TextFormField(
             controller: _emailController,
-            // AppTheme handles the borders and fill color automatically!
             decoration: const InputDecoration(
-              labelText: AppStrings.email,
+              labelText: AppStrings.emailLabel,
               prefixIcon: Icon(Icons.email_outlined),
             ),
             keyboardType: TextInputType.emailAddress,
-            validator: _validateEmail,
             enabled: !widget.isLoading,
+            validator: (val) =>
+                (val == null || !val.contains('@')) ? 'Email invalide' : null,
           ),
           const SizedBox(height: AppDimensions.paddingMedium),
-
           TextFormField(
             controller: _passwordController,
             decoration: const InputDecoration(
-              labelText: AppStrings.password,
+              labelText: AppStrings.passwordLabel,
               prefixIcon: Icon(Icons.lock_outlined),
             ),
             obscureText: true,
-            validator: _validatePassword,
             enabled: !widget.isLoading,
+            validator: (val) =>
+                (val == null || val.length < 6) ? 'Min 6 caractères' : null,
           ),
           const SizedBox(height: AppDimensions.paddingLarge),
-
           SizedBox(
             height: 48,
             child: ElevatedButton(
-              // AppTheme handles the primary color and border radius!
               onPressed: widget.isLoading ? null : _submit,
               child: widget.isLoading
                   ? const SizedBox(

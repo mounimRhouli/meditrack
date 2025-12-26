@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_strings.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_strings.dart';
+import '../../../../core/theme/text_styles.dart';
+import '../../../../core/constants/app_dimensions.dart';
 
 class ProfileInfoCard extends StatelessWidget {
   final String? bloodType;
@@ -12,27 +14,31 @@ class ProfileInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Rely on AppTheme's CardTheme
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(AppDimensions.paddingMedium),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildStat(context, Icons.bloodtype, "Sang", bloodType ?? "-"),
-            Container(height: 30, width: 1, color: AppColors.border),
-            _buildStat(
+            _buildStatItem(
+              context,
+              Icons.bloodtype,
+              AppStrings.bloodType,
+              bloodType ?? "-",
+            ),
+            _buildDivider(),
+            _buildStatItem(
               context,
               Icons.height,
               AppStrings.height,
-              "${height?.toInt() ?? '-'}",
+              "${height?.toStringAsFixed(0) ?? '-'}",
             ),
-            Container(height: 30, width: 1, color: AppColors.border),
-            _buildStat(
+            _buildDivider(),
+            _buildStatItem(
               context,
               Icons.monitor_weight,
               AppStrings.weight,
-              "${weight?.toInt() ?? '-'}",
+              "${weight?.toStringAsFixed(1) ?? '-'}",
             ),
           ],
         ),
@@ -40,24 +46,27 @@ class ProfileInfoCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStat(
+  Widget _buildDivider() {
+    return Container(height: 40, width: 1, color: AppColors.border);
+  }
+
+  Widget _buildStatItem(
     BuildContext context,
     IconData icon,
     String label,
     String value,
   ) {
-    final theme = Theme.of(context);
     return Column(
       children: [
-        Icon(icon, color: theme.colorScheme.primary, size: 28),
-        const SizedBox(height: 4),
-        Text(label, style: theme.textTheme.bodySmall),
-        Text(
-          value,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+        Icon(
+          icon,
+          color: Theme.of(context).colorScheme.primary,
+          size: AppDimensions.iconLarge,
         ),
+        const SizedBox(height: AppDimensions.paddingSmall),
+        Text(label, style: AppTextStyles.bodySm),
+        const SizedBox(height: 4),
+        Text(value, style: AppTextStyles.h3),
       ],
     );
   }

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/constants/app_strings.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_dimensions.dart';
+import '../../../../core/theme/text_styles.dart';
 import '../../auth/viewmodels/auth_viewmodel.dart';
 import '../viewmodels/emergency_viewmodel.dart';
 import '../models/emergency_info.dart';
@@ -16,12 +20,10 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
   @override
   void initState() {
     super.initState();
-    // Load data immediately
     Future.microtask(() {
       final user = context.read<AuthViewModel>().user;
-      if (user != null) {
+      if (user != null)
         context.read<EmergencyViewModel>().loadEmergencyInfo(user.id);
-      }
     });
   }
 
@@ -29,112 +31,107 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'EMERGENCY MODE',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.red.shade700,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            tooltip: 'Edit Emergency Info',
-            onPressed: () {
-              // Navigation to Edit Screen would go here
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Edit feature would open here.")),
-              );
-            },
-          ),
-        ],
+        title: const Text(AppStrings.emergencyTitle),
+        backgroundColor: AppColors.error,
       ),
       body: Consumer<EmergencyViewModel>(
         builder: (context, viewModel, child) {
-          if (viewModel.isLoading) {
+          if (viewModel.isLoading)
             return const Center(child: CircularProgressIndicator());
-          }
-
-          if (viewModel.status == EmergencyStatus.error) {
-            return Center(
-              child: Text(viewModel.errorMessage ?? 'Error loading info'),
-            );
-          }
-
           final info = viewModel.info;
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(AppDimensions.paddingMedium),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // 1. THE BIG RED BUTTON
                 SizedBox(
                   height: 60,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: AppColors.error,
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
                     ),
                     icon: const Icon(Icons.phone_in_talk, size: 32),
                     label: const Text(
-                      "CALL AMBULANCE (911)",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      AppStrings.callAmbulance,
+                      style: AppTextStyles.h2,
                     ),
                     onPressed: () => viewModel.callAmbulance(),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: AppDimensions.paddingLarge),
 
-                // 2. Medical ID Card
-                _buildSectionTitle(context, "Medical ID"),
+                Text(
+                  AppStrings.medicalId,
+                  style: AppTextStyles.h3.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
                 Card(
-                  elevation: 4,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: Colors.red.shade100, width: 2),
+                    side: const BorderSide(color: AppColors.error, width: 2),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(AppDimensions.paddingMedium),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildInfoRow(
-                          "Blood Type",
-                          info?.bloodType ?? "Unknown",
+                          AppStrings.bloodType,
+                          info?.bloodType ?? "N/A",
                         ),
-                        const Divider(height: 24),
+                        const Divider(),
                         _buildInfoRow(
-                          "Allergies / Notes",
-                          info?.medicalNotes ?? "None recorded",
+                          AppStrings.allergies,
+                          info?.medicalNotes ?? "None",
                         ),
                         const SizedBox(height: 8),
                         const Text(
-                          "Show this screen to first responders.",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
-                            fontStyle: FontStyle.italic,
-                          ),
+                          AppStrings.showToFirstResponders,
+                          style: TextStyle(fontStyle: FontStyle.italic),
                         ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
 
-                // 3. Emergency Contacts
-                _buildSectionTitle(context, "Emergency Contacts"),
+                const SizedBox(height: AppDimensions.paddingLarge),
+
+                Text(
+                  AppStrings.emergencyContacts,
+                  style: AppTextStyles.h3.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
                 if (info == null || info.contacts.isEmpty)
-                  _buildEmptyState()
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                      AppStrings.noContacts,
+                      style: AppTextStyles.bodyMd,
+                    ),
+                  )
                 else
                   ...info.contacts.map(
-                    (contact) => _buildContactTile(context, viewModel, contact),
+                    (c) => Card(
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: AppColors.error.withOpacity(0.1),
+                          child: Text(c.name[0]),
+                        ),
+                        title: Text(c.name, style: AppTextStyles.h3),
+                        subtitle: Text("${c.relationship} • ${c.phoneNumber}"),
+                        trailing: IconButton(
+                          icon: const Icon(
+                            Icons.call,
+                            color: AppColors.success,
+                          ),
+                          onPressed: () => viewModel.callNumber(c.phoneNumber),
+                        ),
+                      ),
+                    ),
                   ),
               ],
             ),
@@ -144,86 +141,13 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
     );
   }
 
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Text(
-        title.toUpperCase(),
-        style: TextStyle(
-          color: Colors.grey.shade700,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
-        ),
-      ),
-    );
-  }
-
   Widget _buildInfoRow(String label, String value) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+        Text(label, style: AppTextStyles.bodySm),
+        Text(value, style: AppTextStyles.h2),
       ],
-    );
-  }
-
-  Widget _buildContactTile(
-    BuildContext context,
-    EmergencyViewModel vm,
-    EmergencyContact contact,
-  ) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Colors.red.shade50,
-          child: Text(
-            contact.name[0].toUpperCase(),
-            style: TextStyle(
-              color: Colors.red.shade800,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        title: Text(
-          contact.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text("${contact.relationship} • ${contact.phoneNumber}"),
-        trailing: IconButton(
-          icon: const Icon(Icons.call, color: Colors.green),
-          iconSize: 32,
-          onPressed: () => vm.callNumber(contact.phoneNumber),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),
-        border: BorderStyle.solid == BorderStyle.solid
-            ? Border.all(color: Colors.grey.shade300)
-            : null,
-      ),
-      child: const Column(
-        children: [
-          Icon(Icons.person_off, size: 48, color: Colors.grey),
-          SizedBox(height: 8),
-          Text(
-            "No emergency contacts set.",
-            style: TextStyle(color: Colors.grey),
-          ),
-        ],
-      ),
     );
   }
 }
