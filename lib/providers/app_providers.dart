@@ -24,6 +24,11 @@ import '../features/documents/repositories/document_repository.dart';
 import '../features/documents/viewmodels/documents_viewmodel.dart';
 import '../features/documents/viewmodels/ocr_viewmodel.dart';
 
+import '../features/profile/data_sources/profile_local_data_source.dart';
+import '../features/profile/data_sources/profile_remote_data_source.dart';
+import '../features/profile/repositories/profile_repository.dart';
+import '../features/profile/viewmodels/profile_viewmodel.dart';
+
 // 1. CORE
 final dbProvider = Provider<DatabaseHelper>((ref) => DatabaseHelper());
 
@@ -106,4 +111,34 @@ final documentsViewModelProvider =
 final ocrViewModelProvider = 
     StateNotifierProvider<OCRViewModel, OCRState>((ref) {
   return OCRViewModel(ref.watch(ocrServiceProvider));
+});
+
+/// 1. Remote Data Source (Developer A's logic)
+final profileRemoteDataSourceProvider = Provider<ProfileRemoteDataSource>((ref) {
+  return ProfileRemoteDataSource(); 
+});
+
+/// 2. Local Data Source Implementation (Developer B's logic)
+/// This links the abstract class to your SQLite implementation.
+final profileLocalDataSourceProvider = Provider<ProfileLocalDataSource>((ref) {
+  final dbHelper = ref.watch(dbProvider);
+  return ProfileLocalDataSourceImpl(dbHelper);
+});
+
+/// 3. Repository
+/// Orchestrates the 'Smart Sync Strategy' between Cloud and Local.
+final profileRepositoryProvider = Provider<ProfileRepository>((ref) {
+  return ProfileRepository(
+    remoteDataSource: ref.watch(profileRemoteDataSourceProvider),
+    localDataSource: ref.watch(profileLocalDataSourceProvider),
+  );
+});
+
+/// 4. ViewModel (State Management)
+/// Manages loading/error states and allows the UI to watch the profile.
+/// 4. ViewModel (State Management)
+/// Uses ChangeNotifierProvider to match the ProfileViewModel implementation.
+final profileViewModelProvider = ChangeNotifierProvider<ProfileViewModel>((ref) {
+  final repository = ref.watch(profileRepositoryProvider);
+  return ProfileViewModel(profileRepository: repository);
 });

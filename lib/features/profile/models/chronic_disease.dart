@@ -3,8 +3,8 @@ import 'dart:convert';
 class ChronicDisease {
   final String id;
   final String name;
-  final String? diagnosedDate; // Store as ISO String YYYY-MM-DD
-  final String? treatmentPlan; // Brief notes
+  final String? diagnosedDate;
+  final String? treatmentPlan;
 
   ChronicDisease({
     required this.id,
@@ -13,15 +13,18 @@ class ChronicDisease {
     this.treatmentPlan,
   });
 
+  // Use this for SQLite insertions
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'name': name,
-      'diagnosed_date': diagnosedDate,
+      // Ensure these match your MigrationV1 column names
+      'diagnosed_date': diagnosedDate, 
       'treatment_plan': treatmentPlan,
     };
   }
 
+  // Use this for SQLite queries
   factory ChronicDisease.fromMap(Map<String, dynamic> map) {
     return ChronicDisease(
       id: map['id'] ?? '',
