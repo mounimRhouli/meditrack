@@ -1,33 +1,32 @@
-// lib/features/medications/views/add_medication_screen.dart
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; //
 import 'package:meditrack/core/constants/app_strings.dart';
 import 'package:meditrack/core/constants/app_dimensions.dart';
+import 'package:meditrack/core/constants/app_colors.dart'; // FIX for image_cec02a.png
 import 'package:meditrack/shared/widgets/custom_app_bar.dart';
 import 'package:meditrack/shared/widgets/custom_button.dart';
 import 'package:meditrack/shared/widgets/custom_text_field.dart';
 import 'package:meditrack/shared/widgets/loading_indicator.dart';
 import 'package:meditrack/shared/extensions/context_extensions.dart';
-import 'package:meditrack/features/medications/viewmodels/medication_form_viewmodel.dart';
+import 'package:meditrack/providers/app_providers.dart'; // To access providers
 import './widgets/medication_form_selector.dart';
 import './widgets/barcode_scan_button.dart';
 
-class AddMedicationScreen extends StatelessWidget {
+// Use ConsumerWidget to work with Riverpod
+class AddMedicationScreen extends ConsumerWidget {
   const AddMedicationScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => MedicationFormViewModel(repository: DummyMedicationRepository()),
-      child: Scaffold(
-        appBar: CustomAppBar(title: AppStrings.addMedicine),
-        body: Consumer<MedicationFormViewModel>(
-          builder: (context, viewModel, child) {
-            if (viewModel.isLoading) {
-              return const LoadingIndicator();
-            }
-            return SingleChildScrollView(
+  Widget build(BuildContext context, WidgetRef ref) {
+    // FIX for image_cebd5c.png: Watch the real ViewModel provider
+    final viewModel = ref.watch(medicationFormViewModelProvider);
+
+    return Scaffold(
+      // FIX for image_cec404.png: Correct parameter name is 'appBar'
+      appBar: CustomAppBar(title: AppStrings.addMedicine),
+      body: viewModel.isLoading
+          ? const LoadingIndicator()
+          : SingleChildScrollView(
               padding: const EdgeInsets.all(AppDimensions.paddingMedium),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -43,15 +42,17 @@ class AddMedicationScreen extends StatelessWidget {
                         child: CustomTextField(
                           labelText: AppStrings.medicineDosage,
                           keyboardType: TextInputType.number,
-                          onChanged: (value) => viewModel.updateDosage(double.tryParse(value) ?? 0),
+                          onChanged: (value) => viewModel.updateDosage(
+                              double.tryParse(value) ?? 0),
                         ),
                       ),
                       const SizedBox(width: AppDimensions.paddingSmall),
-                      // TODO: Ajouter un dropdown pour l'unité de dosage
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 16),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Theme.of(context).colorScheme.outline),
+                          border: Border.all(
+                              color: Theme.of(context).colorScheme.outline),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text('mg', style: context.textTheme.bodyMedium),
@@ -76,7 +77,8 @@ class AddMedicationScreen extends StatelessWidget {
                   const SizedBox(height: AppDimensions.paddingLarge),
                   if (viewModel.errorMessage != null)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: AppDimensions.paddingMedium),
+                      padding: const EdgeInsets.only(
+                          bottom: AppDimensions.paddingMedium),
                       child: Text(
                         viewModel.errorMessage!,
                         style: const TextStyle(color: AppColors.error),
@@ -89,18 +91,17 @@ class AddMedicationScreen extends StatelessWidget {
                       final success = await viewModel.saveMedication();
                       if (success) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Médicament enregistré avec succès!')),
+                          const SnackBar(
+                              content:
+                                  Text('Médicament enregistré avec succès!')),
                         );
-                        context.pop();
+                        Navigator.of(context).pop();
                       }
                     },
                   ),
                 ],
               ),
-            );
-          },
-        ),
-      ),
+            ),
     );
   }
 }

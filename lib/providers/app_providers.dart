@@ -28,6 +28,13 @@ import '../features/profile/data_sources/profile_local_data_source.dart';
 import '../features/profile/data_sources/profile_remote_data_source.dart';
 import '../features/profile/repositories/profile_repository.dart';
 import '../features/profile/viewmodels/profile_viewmodel.dart';
+import '../features/medications/data_sources/medication_local_data_source.dart';
+import '../features/medications/repositories/medication_repository.dart';
+import '../features/medications/data_sources/medication_local_data_source.dart';
+import '../features/medications/repositories/medication_repository.dart';
+import '../features/medications/viewmodels/medication_form_viewmodel.dart';
+import '../features/medications/viewmodels/medications_list_viewmodel.dart';
+
 
 // 1. CORE
 final dbProvider = Provider<DatabaseHelper>((ref) => DatabaseHelper());
@@ -142,3 +149,17 @@ final profileViewModelProvider = ChangeNotifierProvider<ProfileViewModel>((ref) 
   final repository = ref.watch(profileRepositoryProvider);
   return ProfileViewModel(profileRepository: repository);
 });
+
+// ... existing imports
+
+final medicationLocalDataSourceProvider = Provider((ref) => 
+    MedicationLocalDataSource(ref.watch(dbProvider)));
+
+final medicationRepositoryProvider = Provider((ref) => 
+    MedicationRepository(ref.watch(medicationLocalDataSourceProvider)));
+
+final medicationFormViewModelProvider = ChangeNotifierProvider((ref) => 
+    MedicationFormViewModel(repository: ref.watch(medicationRepositoryProvider)));
+
+final medicationsListViewModelProvider = ChangeNotifierProvider((ref) => 
+    MedicationsListViewModel(repository: ref.watch(medicationRepositoryProvider)));

@@ -1,13 +1,27 @@
-// lib/features/medications/repositories/medication_repository.dart
+import '../models/medication.dart';
+import '../data_sources/medication_local_data_source.dart';
 
-import 'package:meditrack/features/medications/models/medication.dart';
+class MedicationRepository {
+  final MedicationLocalDataSource _localDataSource;
 
-// Classe abstraite définissant le contrat pour les opérations sur les médicaments.
-// Le Développeur B créera l'implémentation concrète.
-abstract class MedicationRepository {
-  Future<void> addMedication(Medication medication);
-  Future<void> updateMedication(Medication medication);
-  Future<void> deleteMedication(String id);
-  Future<List<Medication>> getAllMedications();
-  Future<Medication?> getMedicationById(String id);
+  MedicationRepository(this._localDataSource);
+
+  // FIX: Name matches MedicationFormViewModel.saveMedication()
+  Future<void> addMedication(Medication medication) {
+    return _localDataSource.insertMedication(medication);
+  }
+
+  // FIX: Name matches MedicationsListViewModel.loadMedications()
+  Future<List<Medication>> getAllMedications() {
+    return _localDataSource.fetchAll();
+  }
+
+  // FIX: Name matches MedicationsListViewModel.deleteMedication()
+  Future<void> deleteMedication(String id) {
+    return _localDataSource.removeById(id);
+  }
+
+  Future<List<Medication>> search(String query) {
+    return _localDataSource.searchMedications(query);
+  }
 }

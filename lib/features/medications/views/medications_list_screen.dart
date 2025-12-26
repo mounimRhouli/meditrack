@@ -1,7 +1,5 @@
-// lib/features/medications/views/medications_list_screen.dart
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; //
 import 'package:meditrack/core/constants/app_strings.dart';
 import 'package:meditrack/core/constants/app_colors.dart';
 import 'package:meditrack/routes/route_names.dart';
@@ -10,86 +8,84 @@ import 'package:meditrack/shared/widgets/loading_indicator.dart';
 import 'package:meditrack/shared/widgets/empty_state_widget.dart';
 import 'package:meditrack/shared/widgets/error_widget.dart';
 import 'package:meditrack/shared/extensions/context_extensions.dart';
-import 'package:meditrack/features/medications/viewmodels/medications_list_viewmodel.dart';
+import 'package:meditrack/providers/app_providers.dart'; //
 import '../views/widgets/medication_card.dart';
 
-class MedicationsListScreen extends StatelessWidget {
+// Change to ConsumerWidget for Riverpod
+class MedicationsListScreen extends ConsumerWidget {
   const MedicationsListScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch the real ViewModel provider
+    final viewModel = ref.watch(medicationsListViewModelProvider);
+
     return Scaffold(
       appBar: CustomAppBar(
         title: AppStrings.treatmentsTitle,
         actions: [
-          // NOUVEAU: Barre de recherche
           IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () => _showSearchDialog(context),
+            icon: const Icon(Icons.search),
+            onPressed: () => _showSearchDialog(context, ref),
           ),
         ],
       ),
-      body: Consumer<MedicationsListViewModel>(
-        builder: (context, viewModel, child) {
-          if (viewModel.isLoading) {
-            return const LoadingIndicator();
-          }
+      body: Builder(builder: (context) {
+        if (viewModel.isLoading) {
+          return const LoadingIndicator();
+        }
 
-          if (viewModel.error != null) {
-            return CustomErrorWidget(
-              message: viewModel.error!,
-              onRetry: viewModel.loadMedications,
-            );
-          }
-
-          if (viewModel.medications.isEmpty) {
-            return EmptyStateWidget(
-              icon: Icons.medication_outlined,
-              title: 'Aucun médicament',
-              message:
-                  'Vous n\'avez pas encore ajouté de médicaments. Appuyez sur le bouton ci-dessous pour en ajouter un.',
-            );
-          }
-
-          return Column(
-            children: [
-              // NOUVEAU: Champ de recherche
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Rechercher un médicament...',
-                    prefixIcon: Icon(Icons.search),
-                  ),
-                  onChanged: viewModel
-                      .searchMedications, // NOUVEAU: connecter la recherche
-                ),
-              ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: viewModel.loadMedications,
-                  color: AppColors.primary,
-                  child: ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 80),
-                    itemCount: viewModel.medications.length,
-                    itemBuilder: (context, index) {
-                      final medication = viewModel.medications[index];
-                      return MedicationCard(
-                        medication: medication,
-                        onTap: () {
-                          // TODO: Naviguer vers l'écran de détails
-                          // context.pushNamed(AppRouteNames.medicationDetail, extra: medication);
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ],
+        if (viewModel.error != null) {
+          return CustomErrorWidget(
+            message: viewModel.error!,
+            onRetry: viewModel.loadMedications,
           );
-        },
-      ),
+        }
+
+        if (viewModel.medications.isEmpty) {
+          return const EmptyStateWidget(
+            icon: Icons.medication_outlined,
+            title: 'Aucun médicament',
+            message: 'Vous n\'avez pas encore ajouté de médicaments.',
+          );
+        }
+
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                decoration: const InputDecoration(
+                  hintText: 'Rechercher un médicament...',
+                  prefixIcon: Icon(Icons.search),
+                ),
+                // This will work after adding the method to the ViewModel below
+                onChanged: viewModel.searchMedications, 
+              ),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: viewModel.loadMedications,
+                color: AppColors.primary,
+                child: ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 80),
+                  itemCount: viewModel.medications.length,
+                  itemBuilder: (context, index) {
+                    final medication = viewModel.medications[index];
+                    return MedicationCard(
+                      medication: medication,
+                      onTap: () {
+                        // Navigate to detail using standard go_router context
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        );
+      }),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.pushNamed(AppRouteNames.addMedication),
         backgroundColor: AppColors.primary,
@@ -98,28 +94,27 @@ class MedicationsListScreen extends StatelessWidget {
     );
   }
 
-  // NOUVEAU: Dialogue de recherche
-  void _showSearchDialog(BuildContext context) {
+  void _showSearchDialog(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Rechercher un médicament'),
+        title: const Text('Rechercher un médicament'),
         content: Padding(
           padding: const EdgeInsets.all(16.0),
           child: TextField(
             autofocus: true,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Entrez le nom du médicament...',
             ),
             onSubmitted: (value) {
+              ref.read(medicationsListViewModelProvider).searchMedications(value);
               Navigator.of(context).pop();
-              // TODO: Naviguer vers une page de résultats de recherche
             },
           ),
         ),
         actions: [
           TextButton(
-            child: Text('Annuler'),
+            child: const Text('Annuler'),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
