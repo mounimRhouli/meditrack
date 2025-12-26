@@ -15,6 +15,15 @@ import '../features/history/repositories/history_repository.dart';
 import '../features/history/viewmodels/history_viewmodel.dart';
 import '../features/history/viewmodels/history_stats_viewmodel.dart';
 
+// --- Features: Documents (Phase 3) ---
+import '../features/documents/services/image_picker_service.dart';
+import '../features/documents/services/ocr_service.dart';
+import '../features/documents/services/file_manager_service.dart';
+import '../features/documents/data_sources/file_storage_data_source.dart';
+import '../features/documents/repositories/document_repository.dart';
+import '../features/documents/viewmodels/documents_viewmodel.dart';
+import '../features/documents/viewmodels/ocr_viewmodel.dart';
+
 // 1. CORE
 final dbProvider = Provider<DatabaseHelper>((ref) => DatabaseHelper());
 
@@ -62,4 +71,39 @@ final historyRepositoryProvider = Provider<HistoryRepository>((ref) {
 final historyViewModelProvider = StateNotifierProvider<HistoryViewModel, HistoryState>((ref) {
   final repository = ref.read(historyRepositoryProvider);
   return HistoryViewModel(repository);
+});
+
+
+
+
+// ==========================================
+// 2. DOCUMENT MANAGEMENT PROVIDERS (Phase 3)
+// ==========================================
+
+// Services
+final imagePickerServiceProvider = Provider((ref) => ImagePickerService());
+final ocrServiceProvider = Provider((ref) => OCRService());
+final fileManagerServiceProvider = Provider((ref) => FileManagerService());
+
+// Data Sources
+final fileStorageDataSourceProvider = Provider((ref) => FileStorageDataSource());
+
+// Repository
+final documentRepositoryProvider = Provider((ref) => DocumentRepository(
+  ref.watch(dbProvider),
+  ref.watch(fileStorageDataSourceProvider),
+  ref.watch(fileManagerServiceProvider),
+));
+
+// ViewModels
+// Gère la liste des documents et l'état de chargement
+final documentsViewModelProvider = 
+    StateNotifierProvider<DocumentsViewModel, DocumentsState>((ref) {
+  return DocumentsViewModel(ref.watch(documentRepositoryProvider));
+});
+
+// Gère spécifiquement l'état du scan OCR (en cours, texte extrait)
+final ocrViewModelProvider = 
+    StateNotifierProvider<OCRViewModel, OCRState>((ref) {
+  return OCRViewModel(ref.watch(ocrServiceProvider));
 });
