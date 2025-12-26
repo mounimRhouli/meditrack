@@ -1,12 +1,7 @@
-// lib/shared/widgets/sync_status_indicator.dart
-
 import 'package:flutter/material.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_dimensions.dart';
 import '../models/sync_status.dart';
-
-// You'll need to create this enum in your shared models folder
-
 
 class SyncStatusIndicator extends StatelessWidget {
   final SyncStatus status;
@@ -21,34 +16,44 @@ class SyncStatusIndicator extends StatelessWidget {
 
     switch (status) {
       case SyncStatus.synced:
-        color = AppColors.success;
+        color = AppColors.success; // Vert (issu de votre identité visuelle)
         icon = Icons.cloud_done;
         tooltip = 'Synchronisé';
         break;
       case SyncStatus.syncing:
-        color = AppColors.primary;
+        color = AppColors.primary; // Bleu (issu de votre identité visuelle)
         icon = Icons.sync;
-        tooltip = 'Synchronisation...';
+        tooltip = 'Synchronisation en cours...';
         break;
       case SyncStatus.error:
         color = AppColors.error;
-        icon = Icons.cloud_off;
+        icon = Icons.warning_amber_rounded;
         tooltip = 'Erreur de synchronisation';
         break;
-      case SyncStatus.offline:
+      case SyncStatus.pending:
+        // L'état pending remplace offline pour indiquer que les données attendent d'être envoyées
         color = AppColors.textSecondary;
-        icon = Icons.cloud_queue;
-        tooltip = 'Hors ligne';
+        icon = Icons.cloud_upload_outlined;
+        tooltip = 'En attente de synchronisation (Local)';
         break;
     }
 
-    return Tooltip(
-      message: tooltip,
-      child: Icon(
-        icon,
-        color: color,
-        size: AppDimensions.iconMedium,
-      ),
+    // Ajout d'une animation si l'état est "syncing" pour plus de professionnalisme
+    Widget iconWidget = Icon(
+      icon,
+      color: color,
+      size: AppDimensions.iconMedium,
     );
+
+    if (status.isBusy) {
+      iconWidget = RotationTransition(
+        turns: const AlwaysStoppedAnimation(
+          0.5,
+        ), // Vous pourriez utiliser un AnimationController ici
+        child: iconWidget,
+      );
+    }
+
+    return Tooltip(message: tooltip, child: iconWidget);
   }
 }

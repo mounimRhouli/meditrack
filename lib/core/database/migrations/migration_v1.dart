@@ -10,16 +10,19 @@ class MigrationV1 {
 
     // 1. Users Table (Auth & Profile)
     batch.execute('''
-      CREATE TABLE users (
-        id TEXT PRIMARY KEY,
-        email TEXT UNIQUE NOT NULL,
-        name TEXT,
-        profile_picture TEXT, -- Path to local or remote image
-        created_at INTEGER NOT NULL,
-        last_updated INTEGER NOT NULL,
-        sync_status TEXT DEFAULT 'pending' -- 'synced', 'pending', 'error'
-      )
-    ''');
+  CREATE TABLE users (
+    id TEXT PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    name TEXT,
+    blood_type TEXT, -- Metric
+    height REAL,      -- Metric
+    weight REAL,      -- Metric
+    profile_picture TEXT,
+    created_at INTEGER NOT NULL,
+    last_updated INTEGER NOT NULL,
+    sync_status TEXT DEFAULT 'pending'
+  )
+''');
 
     // 2. Allergies Table (Profile)
     batch.execute('''

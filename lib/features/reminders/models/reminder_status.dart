@@ -1,0 +1,1 @@
+enum ReminderStatus { active, paused, completed }
