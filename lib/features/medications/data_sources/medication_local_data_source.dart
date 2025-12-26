@@ -1,13 +1,43 @@
-// lib/features/medications/data_sources/medication_remote_data_source.dart
+import 'package:sqflite/sqflite.dart';
+import '../../../core/database/database_helper.dart';
+import '../models/medication.dart';
 
-import 'package:meditrack/features/medications/models/medication.dart';
+class MedicationLocalDataSource {
+  final DatabaseHelper _dbHelper;
 
-/// Définit les opérations pour la source de données distante (Firebase).
-/// L'implémentation concrète sera gérée par le Développeur B.
-abstract class MedicationRemoteDataSource {
-  /// Synchronise un médicament vers le cloud (Firebase).
-  Future<void> syncMedicationToCloud(Medication medication);
+  MedicationLocalDataSource(this._dbHelper);
 
-  /// Récupère les médicaments depuis le cloud.
-  Future<List<Medication>> getMedicationsFromCloud();
+  Future<void> insertMedication(Medication medication) async {
+    final db = await _dbHelper.database;
+    await db.insert(
+      'medications',
+      medication.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Medication>> fetchAll() async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query('medications');
+    return maps.map((map) => Medication.fromMap(map)).toList();
+  }
+
+  Future<void> removeById(String id) async {
+    final db = await _dbHelper.database;
+    await db.delete(
+      'medications',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  Future<List<Medication>> searchMedications(String query) async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'medications',
+      where: 'name LIKE ?',
+      whereArgs: ['%$query%'],
+    );
+    return maps.map((map) => Medication.fromMap(map)).toList();
+  }
 }
