@@ -1,38 +1,65 @@
-// lib/providers/app_providers.dart
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../core/database/database_helper.dart'; // 1. Import your helper
+import '../core/database/database_helper.dart';
 
-// 2. Create a provider for the DatabaseHelper
-// We use a Provider because DatabaseHelper itself is a singleton and doesn't need to be recreated.
-final dbProvider = Provider<DatabaseHelper>((ref) {
-  // This simply provides an instance of your DatabaseHelper class.
-  // The database itself won't be opened until the first time a data source calls `db.database`.
-  return DatabaseHelper();
+// --- Reminders ---
+import '../features/reminders/data_sources/reminder_local_data_source.dart';
+import '../features/reminders/data_sources/reminder_remote_data_source.dart';
+import '../features/reminders/services/notification_service.dart';
+import '../features/reminders/repositories/reminder_repository.dart';
+import '../features/reminders/viewmodels/reminders_viewmodel.dart';
+
+// --- History ---
+import '../features/history/data_sources/history_local_data_source.dart';
+import '../features/history/data_sources/history_remote_data_source.dart';
+import '../features/history/repositories/history_repository.dart';
+import '../features/history/viewmodels/history_viewmodel.dart';
+import '../features/history/viewmodels/history_stats_viewmodel.dart';
+
+// 1. CORE
+final dbProvider = Provider<DatabaseHelper>((ref) => DatabaseHelper());
+
+// 2. REMINDERS
+final notificationServiceProvider = Provider<NotificationService>((ref) => NotificationService());
+
+final reminderLocalDataSourceProvider = Provider<ReminderLocalDataSource>((ref) {
+  return ReminderLocalDataSource(ref.read(dbProvider));
 });
 
+final reminderRemoteDataSourceProvider = Provider<ReminderRemoteDataSource>((ref) {
+  return ReminderRemoteDataSourceImpl(); 
+});
 
-// In any data source file, e.g., medication_local_data_source.dart
+final reminderRepositoryProvider = Provider<ReminderRepository>((ref) {
+  return ReminderRepository(
+    ref.read(reminderLocalDataSourceProvider),
+    ref.read(notificationServiceProvider),
+  );
+});
 
-// class MedicationLocalDataSource {
-//   // Get a reference to your provider
-//   final DatabaseHelper _dbHelper;
+final remindersViewModelProvider = StateNotifierProvider.family<RemindersViewModel, RemindersState, String>((ref, medicationId) {
+  final repository = ref.read(reminderRepositoryProvider);
+  return RemindersViewModel(repository, medicationId);
+});
 
-//   // Inject it via the constructor (best practice)
-//   MedicationLocalDataSource(this._dbHelper);
+// 3. HISTORY
+final historyLocalDataSourceProvider = Provider<HistoryLocalDataSource>((ref) {
+  return HistoryLocalDataSource(ref.read(dbProvider));
+});
 
-//   Future<void> addMedication(Medication med) async {
-//     // Get the actual database connection
-//     final db = await _dbHelper.database;
-//     // ... now run your SQL queries
-//   }
-// }
+final historyRemoteDataSourceProvider = Provider<HistoryRemoteDataSource>((ref) {
+  // Ensure this is not an abstract class
+  return HistoryRemoteDataSource(); 
+});
 
+final historyRepositoryProvider = Provider<HistoryRepository>((ref) {
+  return HistoryRepository(
+    ref.read(historyLocalDataSourceProvider),
+    ref.read(historyRemoteDataSourceProvider),
+  );
+});
 
-
-// In the future, you will add other providers here:
-// final authRepositoryProvider = Provider<AuthRepository>((ref) {
-//   final dbHelper = ref.read(dbProvider); // See how you can use it!
-//   final authService = FirebaseAuthService();
-//   return AuthRepository(authService, dbHelper);
-// });
+// SINGLE History Provider (Managing both items and stats)
+final historyViewModelProvider = StateNotifierProvider<HistoryViewModel, HistoryState>((ref) {
+  final repository = ref.read(historyRepositoryProvider);
+  return HistoryViewModel(repository);
+});

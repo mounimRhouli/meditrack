@@ -1,0 +1,1 @@
+enum IntakeStatus { taken, missed, late }
