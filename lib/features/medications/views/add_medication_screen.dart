@@ -1,28 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart'; //
+import 'package:flutter_riverpod/flutter_riverpod.dart'; 
 import 'package:meditrack/core/constants/app_strings.dart';
 import 'package:meditrack/core/constants/app_dimensions.dart';
-import 'package:meditrack/core/constants/app_colors.dart'; // FIX for image_cec02a.png
+import 'package:meditrack/core/constants/app_colors.dart'; 
 import 'package:meditrack/shared/widgets/custom_app_bar.dart';
 import 'package:meditrack/shared/widgets/custom_button.dart';
 import 'package:meditrack/shared/widgets/custom_text_field.dart';
 import 'package:meditrack/shared/widgets/loading_indicator.dart';
 import 'package:meditrack/shared/extensions/context_extensions.dart';
-import 'package:meditrack/providers/app_providers.dart'; // To access providers
+import 'package:meditrack/providers/app_providers.dart'; 
 import './widgets/medication_form_selector.dart';
 import './widgets/barcode_scan_button.dart';
 
-// Use ConsumerWidget to work with Riverpod
 class AddMedicationScreen extends ConsumerWidget {
   const AddMedicationScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // FIX for image_cebd5c.png: Watch the real ViewModel provider
+    // Access the real ViewModel provider registered in app_providers.dart
     final viewModel = ref.watch(medicationFormViewModelProvider);
 
     return Scaffold(
-      // FIX for image_cec404.png: Correct parameter name is 'appBar'
       appBar: CustomAppBar(title: AppStrings.addMedicine),
       body: viewModel.isLoading
           ? const LoadingIndicator()
