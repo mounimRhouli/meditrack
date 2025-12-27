@@ -10,7 +10,7 @@ import 'package:meditrack/features/medications/models/medication.dart';
 class MedicationDetailScreen extends StatelessWidget {
   final Medication medication;
 
-  const MedicationDetailScreen({Key? key, required this.medication}) : super(key: key);
+  const MedicationDetailScreen({super.key, required this.medication});
 
   @override
   Widget build(BuildContext context) {

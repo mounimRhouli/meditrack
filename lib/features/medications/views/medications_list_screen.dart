@@ -76,6 +76,10 @@ class MedicationsListScreen extends ConsumerWidget {
                     return MedicationCard(
                       medication: medication,
                       onTap: () {
+                        context.pushNamed(
+                          AppRouteNames.medicationDetail,
+                          extra: medication,
+                        );
                         // Navigate to detail using standard go_router context
                       },
                     );
