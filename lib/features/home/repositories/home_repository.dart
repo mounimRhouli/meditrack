@@ -1,58 +1,82 @@
 // lib/features/home/repositories/home_repository.dart
-
+import 'package:meditrack/core/database/database_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:meditrack/features/home/models/dashboard_data.dart';
+import 'package:meditrack/features/history/data_sources/history_local_data_source.dart';
+import 'package:meditrack/features/medications/data_sources/medication_local_data_source.dart';
 import 'package:meditrack/features/medications/models/medication.dart';
-import 'package:meditrack/features/medications/models/medication_form.dart';
+import 'package:meditrack/features/reminders/data_sources/reminder_local_data_source.dart';
+import 'package:sqflite/sqflite.dart';
 
 // =============================================================================
-// DÉPENDANCES (IMPLÉMENTATIONS SIMPLIFIÉES POUR L'EXEMPLE)
+// IMPORTS DES MODÈLES ET SOURCES DE DONNÉES
 // =============================================================================
-// Dans un vrai projet, ces classes seraient dans leurs propres fichiers et
-// injectées via le constructeur de HomeRepository.
+import '../../../core/database/database_helper.dart';
+import '../../../shared/models/sync_status.dart';
+import '../models/dashboard_data.dart';
 
-// Implémentation simple pour MedicationRepository
+// Les modèles qui n'ont pas été fournis mais sont nécessaires
+// (Ils seront probablement dans leurs propres fichiers dans le projet final)
+enum ReminderStatus { active, paused, completed }
+enum IntakeStatus { taken, missed, late }
+
+// =============================================================================
+// IMPLÉMENTATIONS CONCRÈTES DES REPOSITORIES
+// =============================================================================
+
 class MedicationRepository {
-  // Cette méthode serait connectée à la vraie source de données (SQLite/Firebase)
+  final MedicationLocalDataSource _localDataSource;
+
+  MedicationRepository(this._localDataSource);
+
   Future<List<Medication>> getAllMedications() async {
-    // Simule un délai réseau
-    await Future.delayed(const Duration(seconds: 1));
-    // Retourne une liste de médicaments de test
-    return [
-      Medication(id: '1', name: 'Doliprane', dosage: 500, dosageUnit: 'mg', form: MedicationForm.pill, instructions: '2 comprimés en cas de douleur.', startDate: DateTime.now()),
-      Medication(id: '2', name: 'Humex', dosage: 200, dosageUnit: 'ml', form: MedicationForm.syrup, instructions: '10 ml toutes les 8 heures.', startDate: DateTime.now()),
-      Medication(id: '3', name: 'Ventoline', dosage: 100, dosageUnit: 'µg', form: MedicationForm.inhaler, instructions: '1-2 inhalations en cas de crise.', startDate: DateTime.now()),
-    ];
+    return await _localDataSource.fetchAll();
   }
 }
 
-// Implémentation simple pour ReminderRepository (basée sur votre code)
 class ReminderRepository {
-  // Dans la vraie version, ceci dépendrait de ReminderLocalDataSource
+  final ReminderLocalDataSource _localDataSource;
+
+  ReminderRepository(this._localDataSource);
+
   Future<int> getActiveRemindersCount() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    // Simule le comptage de rappels actifs
-    return 3;
+    final allReminders = await _localDataSource.fetchReminders();
+    // Filtre pour ne compter que les rappels actifs
+    return allReminders.where((reminder) => reminder.status == ReminderStatus.active).length;
   }
 }
 
-// Implémentation simple pour HistoryRepository (basée sur votre code)
 class HistoryRepository {
-  // Dans la vraie version, ceci dépendrait de HistoryLocalDataSource
+  final HistoryLocalDataSource _localDataSource;
+
+  HistoryRepository(this._localDataSource);
+
   Future<double> getMonthlyCompliance() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    // Simule un taux de conformité de 95%
-    return 0.95;
+    final now = DateTime.now();
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    final endOfMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+
+    // Convertit en timestamps pour la requête
+    final startTimestamp = startOfMonth.millisecondsSinceEpoch;
+    final endTimestamp = endOfMonth.millisecondsSinceEpoch;
+
+    final historyEntries = await _localDataSource.getHistoryByRange(startTimestamp, endTimestamp);
+
+    if (historyEntries.isEmpty) {
+      return 0.0; // Pas d'historique, pas de conformité
+    }
+
+    final takenCount = historyEntries.where((entry) => entry.intakeStatus == IntakeStatus.taken).length;
+    final totalCount = historyEntries.length;
+
+    return totalCount > 0 ? takenCount / totalCount : 0.0;
   }
 }
-
 
 // =============================================================================
 // IMPLÉMENTATION CONCRÈTE DE HOME REPOSITORY
 // =============================================================================
 
 class HomeRepository {
-  // Dépendances aux autres repositories
   final MedicationRepository _medicationRepo;
   final ReminderRepository _reminderRepo;
   final HistoryRepository _historyRepo;
@@ -69,7 +93,7 @@ class HomeRepository {
   /// Agrège les données de plusieurs sources pour construire le tableau de bord.
   Future<DashboardData> getDashboardData() async {
     try {
-      // Utilise Future.wait pour exécuter les appels en parallèle et gagner en performance
+      // Utilise Future.wait pour exécuter les appels en parallèle
       final results = await Future.wait([
         _medicationRepo.getAllMedications(),
         _reminderRepo.getActiveRemindersCount(),
@@ -80,22 +104,51 @@ class HomeRepository {
       final reminderCount = results[1] as int;
       final compliance = results[2] as double;
 
-      // Logique simple pour déterminer le "prochain médicament"
-      // Ici, on prend juste le premier de la liste pour l'exemple.
-      // Une vraie logique vérifierait les heures de prise.
+      // Logique pour trouver le "prochain médicament" (simple pour l'exemple)
+      // Une vraie logique analyserait les heures de prise des rappels du jour.
       final nextMed = medications.isNotEmpty ? medications.first : null;
+      final nextTime = '08:00'; // Heure simulée
 
       return DashboardData(
         nextMedication: nextMed,
         totalMedications: medications.length,
         activeReminders: reminderCount,
         monthlyCompliance: compliance,
-        nextMedicationTime: '08:00', // Heure simulée
+        nextMedicationTime: nextTime,
       );
     } catch (e) {
       debugPrint('Erreur lors de la récupération des données du tableau de bord: $e');
-      // En cas d'erreur, on renvoie des données par défaut pour éviter de casser l'UI
-      throw Exception('Impossible de charger les données du tableau de bord.');
+      // En cas d'erreur, on relance pour que l'UI puisse l'afficher
+      rethrow;
     }
   }
+}
+
+
+// =============================================================================
+// FONCTION D'USINE POUR CRÉER L'INSTANCE COMPLÈTE
+// =============================================================================
+// C'est une bonne pratique pour centraliser la création des dépendances.
+
+Future<HomeRepository> createHomeRepository() async {
+  // 1. Initialiser la connexion à la base de données
+  final dbHelper = DatabaseHelper();
+  await dbHelper.database; // S'assure que la base est initialisée
+
+  // 2. Créer les instances des sources de données locales
+  final medicationLocalDS = MedicationLocalDataSource(dbHelper);
+  final reminderLocalDS = ReminderLocalDataSource(dbHelper);
+  final historyLocalDS = HistoryLocalDataSource(dbHelper);
+
+  // 3. Créer les instances des repositories en injectant les sources de données
+  final medicationRepo = MedicationRepository(medicationLocalDS);
+  final reminderRepo = ReminderRepository(reminderLocalDS);
+  final historyRepo = HistoryRepository(historyLocalDS);
+
+  // 4. Créer et retourner l'instance de HomeRepository
+  return HomeRepository(
+    medicationRepo: medicationRepo,
+    reminderRepo: reminderRepo,
+    historyRepo: historyRepo,
+  );
 }

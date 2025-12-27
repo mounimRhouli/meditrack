@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import '../../../core/database/database_helper.dart';
 import '../models/medication.dart';
+import 'package:meditrack/core/constants/database_constants.dart';
 
 class MedicationLocalDataSource {
   final DatabaseHelper _dbHelper;
@@ -10,7 +11,7 @@ class MedicationLocalDataSource {
   Future<void> insertMedication(Medication medication) async {
     final db = await _dbHelper.database;
     await db.insert(
-      'medications',
+      DatabaseConstants.tableMedications,
       medication.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -18,7 +19,7 @@ class MedicationLocalDataSource {
 
   Future<List<Medication>> fetchAll() async {
     final db = await _dbHelper.database;
-    final List<Map<String, dynamic>> maps = await db.query('medications');
+    final List<Map<String, dynamic>> maps = await db.query(DatabaseConstants.tableMedications);
     return maps.map((map) => Medication.fromMap(map)).toList();
   }
 
@@ -34,7 +35,7 @@ class MedicationLocalDataSource {
   Future<List<Medication>> searchMedications(String query) async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query(
-      'medications',
+      DatabaseConstants.tableMedications,
       where: 'name LIKE ?',
       whereArgs: ['%$query%'],
     );

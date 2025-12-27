@@ -2,44 +2,46 @@
 
 class AppRouteNames {
   // Auth
-  static const String login = '../features/auth/views/login_screen.dart';
-  static const String register = '../features/auth/views/register_screen.dart';
+  static const String login = '/login';
+  static const String register = '/register';
 
   // Main App
-  static const String home = '../features/home/views/home_screen.dart';
-  static const String profile = '../features/profile/views/profile_screen.dart';
-  static const String editProfile = '../features/profile/views/edit_profile_screen.dart';
+  static const String home = '/home';
+  static const String profile = '/profile';
+  static const String editProfile = '/profile/edit';
 
   // Medications
-  static const String medicationsList = '../features/medications/views/medications_list_screen.dart';
-  static const String addMedication = '../features/medications/views/add_medication_screen.dart';
-  static const String editMedication = '../features/medications/views/edit_medication_screen.dart';
-  static const String medicationDetail = '../features/medications/views/medication_detail_screen.dart';
-  static const String barcodeScanner = '../features/medications/views/barcode_scanner_screen.dart';
+  static const String medicationsList = '/medications';
+  static const String addMedication = '/medications/add';
+  static const String editMedication = '/medications/edit';
+  static const String medicationDetail = '/medications/detail';
+  static const String barcodeScanner = '/medications/scan';
+
   // Reminders
-  static const String reminders = '../features/reminders/views/reminders_screen.dart';
+  static const String reminders = '/reminders';
 
   // History
-  static const String history = '../features/history/views/history_screen.dart';
-  static const String historyCalendar = '../features/history/views/history_calendar_screen.dart';
-  static const String historyStats = '../features/history/views/history_stats_screen.dart';
+  static const String history = '/history';
+  static const String historyCalendar = '/history/calendar';
+  static const String historyStats = '/history/stats';
 
   // Documents
-  static const String documents = '../features/documents/views/documents_screen.dart';
-  static const String addDocument = '../features/documents/views/add_document_screen.dart';
-  static const String documentDetail = '../features/documents/views/document_detail_screen.dart';
-  static const String ocrPreview = '../features/documents/views/ocr_preview_screen.dart';
+  static const String documents = '/documents';
+  static const String addDocument = '/documents/add';
+  static const String documentDetail = '/documents/detail';
+  static const String ocrPreview = '/documents/ocr';
 
   // Symptoms
-  static const String symptoms = '../features/symptoms/views/symptoms_screen.dart';
-  static const String addSymptom = '../features/symptoms/views/add_symptom_screen.dart';
-  static const String symptomCharts = '../features/symptoms/views/symptom_charts_screen.dart';
+  static const String symptoms = '/symptoms';
+  static const String addSymptom = '/symptoms/add';
+  static const String symptomCharts = '/symptoms/charts';
 
   // Emergency
-  static const String emergency = '../features/emergency/views/emergency_screen.dart';
+  static const String emergency = '/emergency';
+
   // Chatbot
-  static const String chatbot = '../features/chatbot/views/chatbot_screen.dart';
+  static const String chatbot = '/chatbot';
 
   // Sync
-  static const String syncSettings = '../features/sync/views/sync_settings_screen.dart';
+  static const String syncSettings = '/sync';
 }
