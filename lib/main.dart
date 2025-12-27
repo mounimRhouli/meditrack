@@ -1,24 +1,27 @@
-// lib/main.dart
-
 import 'package:flutter/material.dart';
-// 1. CHANGE: Import flutter_riverpod instead of provider
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // Core Imports
 import 'core/constants/app_colors.dart';
 import 'core/constants/app_strings.dart';
+import 'core/database/database_helper.dart'; //
 
 // Feature & Routing Imports
 import 'routes/app_router.dart';
-// NOTE: We no longer need to import AppProviders here directly for the MultiProvider widget.
-// Providers will be read directly by the widgets that need them.
 
-void main() {
-  // Ensure Flutter bindings are initialized
+/// The entry point of the application
+Future<void> main() async {
+  // 1. Ensure Flutter framework is ready for native communication
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 2. CHANGE: Wrap your app with ProviderScope
-  // This is the essential Riverpod widget that stores the state of all your providers.
+  // 2. Initialize the Database (SQLite)
+  // This triggers the creation of tables (Allergies, Medications, etc.)
+  // before the UI starts, preventing null errors during the first fetch.
+  final dbHelper = DatabaseHelper();
+  await dbHelper.database;
+
+  // 3. Start the app within a ProviderScope
+  // This manages the lifecycle of your ViewModels and Repositories.
   runApp(const ProviderScope(child: MediTrackApp()));
 }
 
@@ -27,13 +30,9 @@ class MediTrackApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 3. Your MaterialApp.router remains the same
-    // It is correctly configured and does not need to be changed.
     return MaterialApp.router(
-      // --- Router Configuration ---
       routerConfig: appRouter,
-      debugShowCheckedModeBanner: false, // Set to false for production builds
-      // --- App Configuration ---
+      debugShowCheckedModeBanner: false,
       title: AppStrings.appName,
 
       // --- Theme Configuration ---
@@ -44,12 +43,12 @@ class MediTrackApp extends StatelessWidget {
           brightness: Brightness.light,
         ),
         scaffoldBackgroundColor: AppColors.background,
-        appBarTheme: AppBarTheme(
+        appBarTheme: const AppBarTheme(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.textInverse,
           elevation: 0,
           centerTitle: true,
-          titleTextStyle: const TextStyle(
+          titleTextStyle: TextStyle(
             fontSize: 18.0,
             fontWeight: FontWeight.w600,
             color: AppColors.textInverse,
